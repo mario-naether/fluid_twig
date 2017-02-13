@@ -1,0 +1,11 @@
+{
+    "name": "mario-naether/fluid-twig",
+    "type": "project",
+    "require": {
+        "typo3fluid/fluid": "^2.2",
+        "twig/twig": "~1",
+        "phpunit/php-timer": "^1.0"
+    },
+    "license": "MIT",
+    "minimum-stability": "stable"
+}
