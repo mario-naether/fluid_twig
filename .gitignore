@@ -6,4 +6,4 @@ composer.phar
 composer.lock
 
 /.idea/
-/cache/
+/cache/*.php
