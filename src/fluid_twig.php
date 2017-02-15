@@ -3,34 +3,53 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $maxCount = 10000;
 
+$testConfig = [
+    'fluid' => [
+        [
+            'template' => 'Index.html',
+            'cache' => true
+        ],
+        [
+            'template' => 'Index.html',
+            'cache' => false
+        ]
+    ],
+    'twig' => [
+        [
+            'template' => 'index.html',
+            'cache' => true
+        ],
+        [
+            'template' => 'index.html',
+            'cache' => false
+        ]
+    ],
+];
+
+foreach ($testConfig as $engineKey =>  $engine) {
+    foreach ($engine as $engineConf) {
+
+
+        PHP_Timer::start();
+        echo "starting basic variable rendering with ".$engineKey." (".$maxCount." times, cache ".(int)$engineConf['cache'].")" . PHP_EOL;
+        $f = '';
+        for($i=0;$i < $maxCount;$i++) {
+            if ($engineKey == 'fluid') {
+                $f .= renderBasicFluidVar($engineConf['template'], $engineConf['cache']).PHP_EOL;
+            } elseif ($engineKey == 'twig') {
+                $f .= renderTwig($engineConf['template'], $engineConf['cache']).PHP_EOL;
+            }
+
+        }
+        $time = PHP_Timer::stop();
+        echo PHP_EOL;
+        echo "finished after:" . PHP_EOL;
+        echo  PHP_Timer::secondsToTimeString($time);
+        echo PHP_EOL . '------------------------------------' . PHP_EOL;
+    }
+}
+
 // set up paths object with arrays of paths with files
-
-PHP_Timer::start();
-echo "starting basic variable rendering with Fluid (".$maxCount." times, cache enable)" . PHP_EOL;
-$f = '';
-for($i=0;$i < $maxCount;$i++) {
-    $f .= renderBasicFluidVar('Index.html', true).PHP_EOL;
-}
-
-
-$time = PHP_Timer::stop();
-echo PHP_EOL.PHP_EOL;
-echo "finished after:" . PHP_EOL;
-echo  PHP_Timer::secondsToTimeString($time);
-echo PHP_EOL.PHP_EOL;
-
-PHP_Timer::start();
-echo "starting basic variable rendering with Fluid (".$maxCount." times, cache disable)" . PHP_EOL;
-$f = '';
-for($i=0;$i < $maxCount;$i++) {
-    $f .= renderBasicFluidVar('Index.html', false).PHP_EOL;
-}
-
-
-$time = PHP_Timer::stop();
-echo PHP_EOL.PHP_EOL;
-echo "finished after:" . PHP_EOL;
-echo  PHP_Timer::secondsToTimeString($time);
 
 
 function renderBasicFluidVar($template, $cached) {
@@ -48,4 +67,17 @@ function renderBasicFluidVar($template, $cached) {
 
     $view->assign('foobar', 'MyStuff');
     return $view->render();
+}
+
+function renderTwig($template, $cache) {
+    $opt = [];
+    if ($cache) {
+        $opt = array(
+            'cache' => __DIR__ . '/../cache/twig',
+        );
+    }
+    $loader = new Twig_Loader_Filesystem('src/Templates/Twig');
+    $twig = new Twig_Environment($loader, $opt);
+    $template = $twig->load($template);
+    return $template->render(['foobar' => 'MyStuff']);
 }
