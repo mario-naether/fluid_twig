@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-$maxCount = 10000;
+$maxCount = 100000;
 
 $testConfig = [
     'fluid' => [
@@ -33,11 +33,18 @@ foreach ($testConfig as $engineKey =>  $engine) {
         PHP_Timer::start();
         echo "starting basic variable rendering with ".$engineKey." (".$maxCount." times, cache ".(int)$engineConf['cache'].")" . PHP_EOL;
         $f = '';
+
+        if ($engineKey == 'fluid') {
+            $fluidView = initFluid($engineConf['template'], $engineConf['cache']);
+        } elseif ($engineKey == 'twig') {
+            $twigTemplate = initTwig($engineConf['template'], $engineConf['cache']);
+        }
+
         for($i=0;$i < $maxCount;$i++) {
             if ($engineKey == 'fluid') {
-                $f .= renderBasicFluidVar($engineConf['template'], $engineConf['cache']).PHP_EOL;
+                $f .= renderBasicFluidVar($fluidView).PHP_EOL;
             } elseif ($engineKey == 'twig') {
-                $f .= renderTwig($engineConf['template'], $engineConf['cache']).PHP_EOL;
+                $f .= renderTwig($twigTemplate).PHP_EOL;
             }
 
         }
@@ -51,9 +58,7 @@ foreach ($testConfig as $engineKey =>  $engine) {
 
 // set up paths object with arrays of paths with files
 
-
-function renderBasicFluidVar($template, $cached) {
-
+function initFluid($template, $cached) {
     $FLUID_CACHE_DIRECTORY = !isset($FLUID_CACHE_DIRECTORY) ? __DIR__ . '/../cache/' : $FLUID_CACHE_DIRECTORY;
     // pass the constructed TemplatePaths instance to the View
     $view = new \TYPO3Fluid\Fluid\View\TemplateView();
@@ -64,12 +69,21 @@ function renderBasicFluidVar($template, $cached) {
 
     if ($cached)
         $view->setCache(new \TYPO3Fluid\Fluid\Core\Cache\SimpleFileCache($FLUID_CACHE_DIRECTORY));
+    return $view;
+}
+
+function renderBasicFluidVar(\TYPO3Fluid\Fluid\View\TemplateView $view) {
 
     $view->assign('foobar', 'MyStuff');
     return $view->render();
 }
 
-function renderTwig($template, $cache) {
+/**
+ * @param $templateFile
+ * @param $cache
+ * @return Twig_TemplateWrapper
+ */
+function initTwig($templateFile, $cache) {
     $opt = [];
     if ($cache) {
         $opt = array(
@@ -78,6 +92,9 @@ function renderTwig($template, $cache) {
     }
     $loader = new Twig_Loader_Filesystem('src/Templates/Twig');
     $twig = new Twig_Environment($loader, $opt);
-    $template = $twig->load($template);
+    return $twig->load($templateFile);
+}
+
+function renderTwig(Twig_TemplateWrapper $template) {
     return $template->render(['foobar' => 'MyStuff']);
 }
