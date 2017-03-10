@@ -1,0 +1,5 @@
+Fluid:
+<f:for each="{list}" as="myFoo">
+    <f:render partial="Item" arguments="{myFoo: myFoo, foobar: foobar}" />
+</f:for>
+Item-Count: <f:count>{list}</f:count>

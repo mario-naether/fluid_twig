@@ -12,6 +12,10 @@ $testConfig = [
         [
             'template' => 'Index.html',
             'cache' => false
+        ],
+        [
+            'template' => 'Advanced.html',
+            'cache' => true
         ]
     ],
     'twig' => [
@@ -22,16 +26,24 @@ $testConfig = [
         [
             'template' => 'index.html',
             'cache' => false
+        ],
+        [
+            'template' => 'advanced.html',
+            'cache' => true
         ]
     ],
 ];
+
+for($i=0;$i<10;$i++) {
+    $list[] = new MyFoo('Test1', 'Test1'.$i, 'Num1'.$i);
+}
 
 foreach ($testConfig as $engineKey =>  $engine) {
     foreach ($engine as $engineConf) {
 
 
         PHP_Timer::start();
-        echo "starting basic variable rendering with ".$engineKey." (".$maxCount." times, cache ".(int)$engineConf['cache'].")" . PHP_EOL;
+        echo "starting ".$engineConf['template']." rendering with ".$engineKey." (".$maxCount." times, cache ".(int)$engineConf['cache'].")" . PHP_EOL;
         $f = '';
 
         if ($engineKey == 'fluid') {
@@ -48,6 +60,7 @@ foreach ($testConfig as $engineKey =>  $engine) {
             }
 
         }
+
         $time = PHP_Timer::stop();
         echo PHP_EOL;
         echo "finished after:" . PHP_EOL;
@@ -74,7 +87,10 @@ function initFluid($template, $cached) {
 
 function renderBasicFluidVar(\TYPO3Fluid\Fluid\View\TemplateView $view) {
 
+    global $list;
+
     $view->assign('foobar', 'MyStuff');
+    $view->assign('list', $list);
     return $view->render();
 }
 
@@ -96,5 +112,70 @@ function initTwig($templateFile, $cache) {
 }
 
 function renderTwig(Twig_TemplateWrapper $template) {
-    return $template->render(['foobar' => 'MyStuff']);
+    global $list;
+
+    return $template->render(['foobar' => 'MyStuff', 'list' => $list]);
+}
+
+class MyFoo {
+    private $name;
+    private $title;
+    private $num;
+
+    public function __construct($name, $title, $num)
+    {
+        $this->name = $name;
+        $this->title = $title;
+        $this->num = $num;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param mixed $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNum()
+    {
+        return $this->num;
+    }
+
+    /**
+     * @param mixed $num
+     */
+    public function setNum($num)
+    {
+        $this->num = $num;
+    }
+
+
 }

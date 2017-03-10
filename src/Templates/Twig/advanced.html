@@ -1,0 +1,5 @@
+Twig:
+{% for myFoo in list %}
+    {% include "Part/Item.html" with {myFoo: myFoo, foobar: foobar} %}
+{% endfor %}
+Item-Count: {{list|length}}
