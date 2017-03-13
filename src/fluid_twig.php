@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-$maxCount = 100000;
+$maxCount = 10000;
 
 $testConfig = [
     'fluid' => [
